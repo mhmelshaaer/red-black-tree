@@ -24,7 +24,8 @@ struct RBTreeNode
 template<typename T>
 class RBTree {
 private:
-    typedef typename RBTreeNode<T>::node_color NodeColor;
+    typedef RBTreeNode<T> Node;
+    typedef typename Node::node_color NodeColor;
     typedef std::shared_ptr<RBTreeNode<T>> NodePtr;
     typedef RBTreeNode<T>* ParentPtr;
 	NodePtr _root;
@@ -32,7 +33,7 @@ private:
 
 public:
 	RBTree() {
-		_TNULL = std::make_shared<RBTreeNode<T>>();
+		_TNULL = std::make_shared<Node>();
 		_TNULL->left = nullptr;
 		_TNULL->right = nullptr;
 		_root = _TNULL;
@@ -60,6 +61,20 @@ private:
     void _print_tree(NodePtr root, std::string indent, bool last);
 	void _rotate_left(NodePtr);
 	void _rotate_right(NodePtr);
+
+	// balance states
+	/**
+	 * @brief Node parent sibling is colored red.
+	 * 
+	 * @param node NodePtr.
+	 */
+	void _fix_state00(NodePtr node);
+	/**
+	 * @brief Node parent sibling is colored black.
+	 * 
+	 * @param node NodePtr.
+	 */
+	void _fix_state01(NodePtr node);
 
 	bool _is_root(NodePtr);
 	bool _is_root(ParentPtr);
@@ -117,7 +132,7 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::_find(NodePtr node, T key)
 template<typename T>
 std::shared_ptr<RBTreeNode<T>> RBTree<T>::_insert(NodePtr root, ParentPtr parent, T key) {
 	if (root == _TNULL) {
-		NodePtr new_node = std::make_shared<RBTreeNode<T>>();
+		NodePtr new_node = std::make_shared<Node>();
 		new_node->data = key;
 		new_node->left = _TNULL;
 		new_node->right = _TNULL;
@@ -173,6 +188,25 @@ void RBTree<T>::_insert_fix(NodePtr node) {
 	if (_is_root(node->parent))
 	{
 		return;
+	}
+
+	if (node->parent->color == NodeColor::BLACK)
+	{
+		return;
+	}
+
+	// get the parent sibling node--i.e. uncle.
+	NodePtr parent_sibling = _get_sibling(node->parent);
+
+	if (parent_sibling->color == NodeColor::RED)
+	{
+		// state 00: a parent sibling is red
+		_fix_state00(node);
+	}
+	else
+	{
+		// state 01: a parent sibling is black
+		_fix_state01(node);
 	}
 }
 
@@ -258,6 +292,26 @@ void RBTree<T>::_rotate_right(NodePtr node)
 
 	pivot->right = node;
 }
+
+template<typename T>
+void RBTree<T>::_fix_state00(NodePtr node)
+{
+	NodePtr grand_parent = find(node->parent->parent->data);
+	NodePtr parent = grand_parent->left.get() == node->parent
+		? grand_parent->left
+		: grand_parent->right;
+	NodePtr parent_sibling = _get_sibling(parent.get());
+
+	parent->color = NodeColor::BLACK;
+	parent_sibling->color = NodeColor::BLACK;
+	grand_parent->color = NodeColor::RED;
+
+	_insert_fix(grand_parent);
+}
+
+template<typename T>
+void RBTree<T>::_fix_state01(NodePtr node)
+{}
 
 template<typename T>
 bool RBTree<T>::_is_root(NodePtr node)
