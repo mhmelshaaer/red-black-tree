@@ -20,15 +20,15 @@ template<typename T>
 class RBTree {
 private:
     typedef std::shared_ptr<RBTreeNode<T>> NodePtr;
-	NodePtr root;
-	NodePtr TNULL;
+	NodePtr _root;
+	NodePtr _TNULL;
 
 public:
 	RBTree() {
-		TNULL = std::make_shared<RBTreeNode<T>>();
-		TNULL->left = nullptr;
-		TNULL->right = nullptr;
-		root = TNULL;
+		_TNULL = std::make_shared<RBTreeNode<T>>();
+		_TNULL->left = nullptr;
+		_TNULL->right = nullptr;
+		_root = _TNULL;
 	}
 
 public:
@@ -53,18 +53,18 @@ private:
 };
 
 template<typename T>
-std::shared_ptr<RBTreeNode<T>> RBTree<T>::get_root() { return root; }
+std::shared_ptr<RBTreeNode<T>> RBTree<T>::get_root() { return _root; }
 
 template<typename T>
 std::shared_ptr<RBTreeNode<T>> RBTree<T>::find(T key)
 {
-    return _find(root, key);
+    return _find(_root, key);
 }
 
 template<typename T>
 std::shared_ptr<RBTreeNode<T>> RBTree<T>::_find(NodePtr node, T key)
 {
-	if (node == TNULL || key == node->data) {
+	if (node == _TNULL || key == node->data) {
 		return node;
 	}
 
@@ -78,9 +78,9 @@ template<typename T>
 std::shared_ptr<RBTreeNode<T>> RBTree<T>::insert(T key) {
 	// check if already exists
 	NodePtr new_rbnode = find(key);
-	if (new_rbnode != TNULL) return new_rbnode;
+	if (new_rbnode != _TNULL) return new_rbnode;
 
-	new_rbnode = _insert(root, nullptr, key);
+	new_rbnode = _insert(_root, nullptr, key);
 	insert_fix(new_rbnode);
 
 	return new_rbnode;
@@ -88,16 +88,16 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::insert(T key) {
 
 template<typename T>
 std::shared_ptr<RBTreeNode<T>> RBTree<T>::_insert(NodePtr root, RBTreeNode<T>* parent, T key) {
-	if (root == TNULL) {
+	if (root == _TNULL) {
 		NodePtr new_node = std::make_shared<RBTreeNode<T>>();
 		new_node->data = key;
-		new_node->left = TNULL;
-		new_node->right = TNULL;
+		new_node->left = _TNULL;
+		new_node->right = _TNULL;
 		new_node->parent = parent;
 		new_node->color = 1;
 
         // set as root if first node to insert
-		if (parent == nullptr) root = new_node;
+		if (parent == nullptr) _root = new_node;
 		else linkParentChild(parent, new_node);
 
 		return new_node;
@@ -130,14 +130,14 @@ void RBTree<T>::insert_fix(NodePtr node) {
 
 template<typename T>
 void RBTree<T>::print_tree() {
-    if (root) {
-		_print_tree(root, "", true);
+    if (_root) {
+		_print_tree(_root, "", true);
 	}
 }
 
 template<typename T>
 void RBTree<T>::_print_tree(NodePtr root, std::string indent, bool last) {
-	if (root != TNULL) {
+	if (root != _TNULL) {
 		std::cout << indent;
 		if (last) {
 		std::cout << "R----";
