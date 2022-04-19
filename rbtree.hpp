@@ -12,16 +12,19 @@ struct RBTreeNode
     // no resource management needed since a node cannot exist without a parent.
     typedef RBTreeNode* ParentPtr;
 
+	enum class node_color { RED, BLACK };
+
     T data;
     NodePtr left;
     NodePtr right;
     ParentPtr parent;
-    int color = 0;
+    node_color color = node_color::BLACK;
 };
 
 template<typename T>
 class RBTree {
 private:
+    typedef RBTreeNode<T> Node;
     typedef std::shared_ptr<RBTreeNode<T>> NodePtr;
     typedef RBTreeNode<T>* ParentPtr;
 	NodePtr _root;
@@ -50,6 +53,7 @@ public:
 private:
     NodePtr _find(NodePtr node, T key);
     NodePtr _insert(NodePtr root, ParentPtr parent, T key);
+	NodePtr _get_sibling(ParentPtr);
 
     void _insert_fix(NodePtr node);
     void _link_parent_child(ParentPtr parent, NodePtr child);
@@ -118,7 +122,7 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::_insert(NodePtr root, ParentPtr parent
 		new_node->left = _TNULL;
 		new_node->right = _TNULL;
 		new_node->parent = parent;
-		new_node->color = 1;
+		new_node->color = Node::node_color::RED;
 
         // set as root if first node to insert
 		if (parent == nullptr) _root = new_node;
@@ -134,6 +138,22 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::_insert(NodePtr root, ParentPtr parent
 }
 
 template<typename T>
+std::shared_ptr<RBTreeNode<T>> RBTree<T>::_get_sibling(ParentPtr node)
+{
+	if (_is_root(node))
+	{
+		return nullptr;
+	}
+
+	if (node->parent->left.get() == node)
+	{
+		return node->parent->right;
+	}
+
+	return node->parent->left;
+}
+
+template<typename T>
 void RBTree<T>::_link_parent_child(ParentPtr parent, NodePtr child) {
 	if (child->data < parent->data) {
 		parent->left = child;
@@ -146,7 +166,7 @@ void RBTree<T>::_link_parent_child(ParentPtr parent, NodePtr child) {
 template<typename T>
 void RBTree<T>::_insert_fix(NodePtr node) {
 	if (_is_root(node)) {
-		node->color = 0;
+		node->color = Node::node_color::BLACK;
 		return;
 	}
 
@@ -168,7 +188,7 @@ void RBTree<T>::_print_tree(NodePtr root, std::string indent, bool last) {
 		indent += "|  ";
 		}
 
-		std::string sColor = root->color ? "RED" : "BLACK";
+		std::string sColor = root->color == Node::node_color::RED ? "RED" : "BLACK";
 		std::cout << root->data << "(" << sColor << ")" << std::endl;
 		_print_tree(root->left, indent, false);
 		_print_tree(root->right, indent, true);
