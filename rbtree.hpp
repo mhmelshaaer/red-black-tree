@@ -209,7 +209,35 @@ void RBTree<T>::_rotate_left(NodePtr node)
 
 template<typename T>
 void RBTree<T>::_rotate_right(NodePtr node)
-{}
+{
+	if (node->left == _TNULL) return;
+
+	ParentPtr parent = node->parent;
+	NodePtr pivot = node->left;
+
+	pivot->parent = parent;
+	if (_is_root(node))
+	{
+		_root = pivot;
+	}
+	else if (parent->left == node)
+	{
+		parent->left = pivot;
+	}
+	else if (parent->right == node)
+	{
+		parent->right = pivot;
+	}
+
+	node->parent = pivot.get();
+	node->left = pivot->right;
+	if (node->left != _TNULL)
+	{
+		node->left->parent = node.get();
+	}
+
+	pivot->right = node;
+}
 
 template<typename T>
 bool RBTree<T>::_is_root(NodePtr node)
