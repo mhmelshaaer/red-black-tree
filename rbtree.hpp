@@ -149,7 +149,7 @@ void RBTree<T>::_insert_fix(NodePtr node) {
 		node->color = 0;
 		return;
 	}
-	
+
 	if (_is_root(node->parent))
 	{
 		return;
@@ -174,9 +174,38 @@ void RBTree<T>::_print_tree(NodePtr root, std::string indent, bool last) {
 		_print_tree(root->right, indent, true);
 	}
 }
+
 template<typename T>
 void RBTree<T>::_rotate_left(NodePtr node)
-{}
+{
+	if (node->right == _TNULL) return;
+
+	ParentPtr parent = node->parent;
+	NodePtr pivot = node->right;
+
+	pivot->parent = parent;
+	if (_is_root(node))
+	{
+		_root = pivot;
+	}
+	else if (parent->left == node)
+	{
+		parent->left = pivot;
+	}
+	else if (parent->right == node)
+	{
+		parent->right = pivot;
+	}
+
+	node->parent = pivot.get();
+	node->right = pivot->left;
+	if (node->right != _TNULL)
+	{
+		node->right->parent = node.get();
+	}
+
+	pivot->left = node;
+}
 
 template<typename T>
 void RBTree<T>::_rotate_right(NodePtr node)
