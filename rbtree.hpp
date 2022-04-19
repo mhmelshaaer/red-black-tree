@@ -28,6 +28,7 @@ private:
     typedef typename Node::node_color NodeColor;
     typedef std::shared_ptr<RBTreeNode<T>> NodePtr;
     typedef RBTreeNode<T>* ParentPtr;
+    typedef RBTreeNode<T>* RawNodePtr;
 	NodePtr _root;
 	NodePtr _TNULL;
 
@@ -76,8 +77,27 @@ private:
 	 */
 	void _fix_state01(NodePtr node);
 
+	/**
+	 * @brief Node parent sibling is colored black and
+	 * 		requires a single rotation-- i.e. the straight line case.
+	 * 
+	 * @param node NodePtr.
+	 */
+	void _fix_state10(NodePtr node);
+
+	/**
+	 * @brief Node parent sibling is colored black and
+	 * 		requires a double rotation-- i.e. the triangle case.
+	 * 
+	 * @param node NodePtr.
+	 */
+	void _fix_state11(NodePtr node);
+
+	void _switch_color(RawNodePtr);
+
 	bool _is_root(NodePtr);
-	bool _is_root(ParentPtr);
+	bool _is_root(RawNodePtr);
+	bool _is_state10(RawNodePtr);
 };
 
 /********************
@@ -185,12 +205,7 @@ void RBTree<T>::_insert_fix(NodePtr node) {
 		return;
 	}
 
-	if (_is_root(node->parent))
-	{
-		return;
-	}
-
-	if (node->parent->color == NodeColor::BLACK)
+	if (_is_root(node->parent) || node->parent->color == NodeColor::BLACK)
 	{
 		return;
 	}
@@ -311,7 +326,51 @@ void RBTree<T>::_fix_state00(NodePtr node)
 
 template<typename T>
 void RBTree<T>::_fix_state01(NodePtr node)
+{
+	if (_is_state10(node.get()))
+	{
+		// single rotation
+		return _fix_state10(node);
+	}
+	
+	// double rotation
+	_fix_state11(node);
+}
+
+template<typename T>
+void RBTree<T>::_fix_state10(NodePtr node)
+{
+	NodePtr grand_parent = find(node->parent->parent->data);
+
+	if (grand_parent->left->left == node)
+	{
+		_rotate_right(grand_parent);
+	}
+	else
+	{
+		_rotate_left(grand_parent);
+	}
+
+	// recolor parent and grandparent
+	_switch_color(node->parent);
+	_switch_color(grand_parent.get());
+}
+
+template<typename T>
+void RBTree<T>::_fix_state11(NodePtr node)
 {}
+
+template<typename T>
+void RBTree<T>::_switch_color(RawNodePtr node)
+{
+	if (node->color == NodeColor::RED)
+	{
+		node->color = NodeColor::BLACK;
+		return;
+	}
+
+	node->color = NodeColor::RED;
+}
 
 template<typename T>
 bool RBTree<T>::_is_root(NodePtr node)
@@ -320,9 +379,17 @@ bool RBTree<T>::_is_root(NodePtr node)
 }
 
 template<typename T>
-bool RBTree<T>::_is_root(ParentPtr node)
+bool RBTree<T>::_is_root(RawNodePtr node)
 {
 	return node->parent == nullptr;
+}
+
+template<typename T>
+bool RBTree<T>::_is_state10(RawNodePtr node)
+{
+	ParentPtr grand_parent = node->parent->parent;
+	return grand_parent->left->left.get() == node
+		|| grand_parent->right->right.get() == node;
 }
 
 #endif // RB_TREE
