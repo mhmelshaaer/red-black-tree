@@ -44,6 +44,8 @@ public:
     NodePtr find(T key);
     NodePtr insert(T key);
     NodePtr get_root();
+
+	bool is_terminal(NodePtr);
     // void remove(T key);
 
     // NodePtr rbminimum(NodePtr node);
@@ -106,6 +108,12 @@ private:
 
 template<typename T>
 std::shared_ptr<RBTreeNode<T>> RBTree<T>::get_root() { return _root; }
+
+template<typename T>
+bool RBTree<T>::is_terminal(NodePtr node)
+{
+	return node == _TNULL;
+}
 
 template<typename T>
 std::shared_ptr<RBTreeNode<T>> RBTree<T>::find(T key)
