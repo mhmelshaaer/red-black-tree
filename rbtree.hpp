@@ -358,7 +358,23 @@ void RBTree<T>::_fix_state10(NodePtr node)
 
 template<typename T>
 void RBTree<T>::_fix_state11(NodePtr node)
-{}
+{
+	NodePtr grand_parent = find(node->parent->parent->data);
+	NodePtr parent;
+
+	if (grand_parent->left->right == node)
+	{
+		parent = grand_parent->left;
+		_rotate_left(grand_parent->left);
+	}
+	else
+	{
+		parent = grand_parent->right;
+		_rotate_right(grand_parent->right);
+	}
+
+	_fix_state10(parent);
+}
 
 template<typename T>
 void RBTree<T>::_switch_color(RawNodePtr node)
