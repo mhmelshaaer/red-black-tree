@@ -45,19 +45,20 @@ public:
     NodePtr insert(T key);
     NodePtr get_root();
 
-	bool is_terminal(NodePtr);
-    // void remove(T key);
-
-    // NodePtr rbminimum(NodePtr node);
-    // NodePtr successor(NodePtr node);
-    // NodePtr rbmaximum(NodePtr node);
-    // NodePtr predecessor(NodePtr node);
+    void remove(T key);
     void print_tree();
+
+	bool is_terminal(NodePtr);
 
 private:
     NodePtr _find(NodePtr node, T key);
     NodePtr _insert(NodePtr root, ParentPtr parent, T key);
 	NodePtr _get_sibling(ParentPtr);
+
+    NodePtr _successor(NodePtr node);
+    NodePtr _rbminimum(NodePtr node);
+    NodePtr _predecessor(NodePtr node);
+    NodePtr _rbmaximum(NodePtr node);
 
     void _insert_fix(NodePtr node);
     void _link_parent_child(ParentPtr parent, NodePtr child);
@@ -65,7 +66,7 @@ private:
 	void _rotate_left(NodePtr);
 	void _rotate_right(NodePtr);
 
-	// balance states
+
 	/**
 	 * @brief Node parent sibling is colored red.
 	 * 
@@ -134,6 +135,10 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::insert(T key) {
 }
 
 template<typename T>
+void RBTree<T>::remove(T key)
+{}
+
+template<typename T>
 void RBTree<T>::print_tree() {
     if (_root) {
 		_print_tree(_root, "", true);
@@ -194,6 +199,68 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::_get_sibling(ParentPtr node)
 	}
 
 	return node->parent->left;
+}
+
+template<typename T>
+std::shared_ptr<RBTreeNode<T>> RBTree<T>::_rbminimum(NodePtr node)
+{
+	NodePtr min_node = node;
+	while(!is_terminal(min_node->left)) min_node = min_node->left;
+	return min_node;
+}
+
+template<typename T>
+std::shared_ptr<RBTreeNode<T>> RBTree<T>::_successor(NodePtr node)
+{
+	if (!is_terminal(node->right))
+	{
+		return _rbminimum(node->right);
+	}
+	else if (_is_root(node))
+	{
+		return _TNULL;
+	}
+	else if (node->parent->left == node)
+	{
+		return find(node->parent->data);
+	}
+	else
+	{
+		RawNodePtr itr = node.get();
+		while(!_is_root(itr) && itr->parent->right.get() == itr) itr = itr->parent;
+		return _is_root(itr) ? _TNULL : find(itr->parent->data);
+	}
+}
+
+template<typename T>
+std::shared_ptr<RBTreeNode<T>> RBTree<T>::_rbmaximum(NodePtr node)
+{
+	NodePtr max_node = node;
+	while(!is_terminal(max_node->right)) max_node = max_node->right;
+	return max_node;
+}
+
+template<typename T>
+std::shared_ptr<RBTreeNode<T>> RBTree<T>::_predecessor(NodePtr node)
+{
+	if (!is_terminal(node->left))
+	{
+		return _rbmaximum(node->left);
+	}
+	else if (_is_root(node))
+	{
+		return _TNULL;
+	}
+	else if (node->parent->right == node)
+	{
+		return find(node->parent->data);
+	}
+	else
+	{
+		RawNodePtr itr = node.get();
+		while(!_is_root(itr) && itr->parent->left.get() == itr) itr = itr->parent;
+		return _is_root(itr) ? _TNULL : find(itr->parent->data);
+	}
 }
 
 template<typename T>
