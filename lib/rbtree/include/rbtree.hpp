@@ -53,7 +53,9 @@ public:
 private:
     NodePtr _find(NodePtr node, T key);
     NodePtr _insert(NodePtr root, ParentPtr parent, T key);
+    NodePtr _remove(NodePtr, NodePtr, T);
 	NodePtr _get_sibling(ParentPtr);
+	NodePtr _get_single_child(NodePtr);
 
     NodePtr _successor(NodePtr node);
     NodePtr _rbminimum(NodePtr node);
@@ -61,10 +63,12 @@ private:
     NodePtr _rbmaximum(NodePtr node);
 
     void _insert_fix(NodePtr node);
+    void _remove_fix(NodePtr, NodePtr);
     void _link_parent_child(ParentPtr parent, NodePtr child);
     void _print_tree(NodePtr root, std::string indent, bool last);
 	void _rotate_left(NodePtr);
 	void _rotate_right(NodePtr);
+	void _swap_node(NodePtr, NodePtr);
 
 
 	/**
@@ -101,6 +105,7 @@ private:
 	bool _is_root(NodePtr);
 	bool _is_root(RawNodePtr);
 	bool _is_state10(RawNodePtr);
+    bool _has_two_child(NodePtr node);
 };
 
 /********************
@@ -136,7 +141,13 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::insert(T key) {
 
 template<typename T>
 void RBTree<T>::remove(T key)
-{}
+{
+	// check if exists
+	NodePtr v = find(key);
+	if (v == _TNULL) return;
+
+	_remove(_root, nullptr, key);
+}
 
 template<typename T>
 void RBTree<T>::print_tree() {
@@ -186,6 +197,37 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::_insert(NodePtr root, ParentPtr parent
 }
 
 template<typename T>
+std::shared_ptr<RBTreeNode<T>> RBTree<T>::_remove(NodePtr root, NodePtr parent, T key)
+{
+	if (root->data == key && _has_two_child(root))
+	{
+		NodePtr u = _successor(root);
+		_swap_node(root, u);
+		return _remove(root->right, root, u->data);
+	}
+	if (root->data == key)
+	{
+		NodePtr u = _get_single_child(root);
+		if (parent->left == root)
+		{
+			parent->left = u;
+		}
+		else
+		{
+			parent->right = u;
+		}
+		return root;
+	}
+
+	if (key < root->data)
+	{
+		return _remove(root->left, root, key);
+	}
+
+	return _remove(root->right, root, key);
+}
+
+template<typename T>
 std::shared_ptr<RBTreeNode<T>> RBTree<T>::_get_sibling(ParentPtr node)
 {
 	if (_is_root(node))
@@ -199,6 +241,16 @@ std::shared_ptr<RBTreeNode<T>> RBTree<T>::_get_sibling(ParentPtr node)
 	}
 
 	return node->parent->left;
+}
+
+template<typename T>
+std::shared_ptr<RBTreeNode<T>> RBTree<T>::_get_single_child(NodePtr node)
+{
+	if (!is_terminal(node->left))
+	{
+		return node->left;
+	}
+	return node->right;
 }
 
 template<typename T>
@@ -301,6 +353,10 @@ void RBTree<T>::_insert_fix(NodePtr node) {
 }
 
 template<typename T>
+void RBTree<T>::_remove_fix(NodePtr, NodePtr)
+{}
+
+template<typename T>
 void RBTree<T>::_print_tree(NodePtr root, std::string indent, bool last) {
 	if (root != _TNULL) {
 		std::cout << indent;
@@ -381,6 +437,16 @@ void RBTree<T>::_rotate_right(NodePtr node)
 	}
 
 	pivot->right = node;
+}
+
+template<typename T>
+void RBTree<T>::_swap_node(NodePtr v, NodePtr u)
+{
+	if (is_terminal(u))
+	{
+		return;
+	}
+	std::swap(v->data, u->data);
 }
 
 template<typename T>
@@ -483,4 +549,9 @@ bool RBTree<T>::_is_state10(RawNodePtr node)
 		|| grand_parent->right->right.get() == node;
 }
 
+template<typename T>
+bool RBTree<T>::_has_two_child(NodePtr node)
+{
+	return !is_terminal(node->left) && !is_terminal(node->right);
+}
 #endif // RB_TREE
