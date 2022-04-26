@@ -9,7 +9,8 @@ template<typename T>
 struct RBTreeNode
 {
     typedef std::shared_ptr<RBTreeNode> NodePtr;
-    // no resource management needed since a node cannot exist without a parent.
+    // Don't use shared pointer for the parent to
+	// avoid circular dependency memory leaks.
     typedef RBTreeNode* ParentPtr;
 
 	enum class node_color { RED, BLACK };
