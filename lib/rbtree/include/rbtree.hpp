@@ -184,17 +184,34 @@ private:
 
 	/**
 	 * @brief If both the deleted and the replacement
-	 * 		nodes are black and sibling node is red.
+	 * 		nodes are black and sibling node is black
+	 * 		with a red child in LL or RR states.
 	 * 
 	 */
 	void _remove_fix_state101(NodePtr);
+
+	/**
+	 * @brief If both the deleted and the replacement
+	 * 		nodes are black and sibling node is black
+	 * 		with a red child in LR or RL states.
+	 * 
+	 */
+	void _remove_fix_state110(NodePtr);
+
+	/**
+	 * @brief If both the deleted and the replacement
+	 * 		nodes are black and sibling node is red.
+	 * 
+	 */
+	void _remove_fix_state111(NodePtr);
 
 	void _switch_color(RawNodePtr);
 
 	bool _is_root(NodePtr);
 	bool _is_root(RawNodePtr);
-	bool _is_state10(RawNodePtr);
+	bool _is_insert_fix_state10(RawNodePtr);
 	bool _is_remove_fix_state000(NodePtr, NodePtr);
+	bool _is_remove_fix_state101(NodePtr);
     bool _has_two_child(NodePtr node);
     bool _has_red_child(NodePtr node);
 };
@@ -569,7 +586,7 @@ void RBTree<T>::_insert_fix_state00(NodePtr node)
 template<typename T>
 void RBTree<T>::_insert_fix_state01(NodePtr node)
 {
-	if (_is_state10(node.get()))
+	if (_is_insert_fix_state10(node.get()))
 	{
 		// single rotation
 		return _insert_fix_state10(node);
@@ -634,7 +651,7 @@ void RBTree<T>::_remove_fix_state001(NodePtr u)
 		return _remove_fix_state010(u);
 	}
 
-	_remove_fix_state101(u);
+	_remove_fix_state111(u);
 }
 
 template<typename T>
@@ -653,47 +670,15 @@ void RBTree<T>::_remove_fix_state010(NodePtr u)
 template<typename T>
 void RBTree<T>::_remove_fix_state011(NodePtr u)
 {
-	NodePtr parent = find(u->parent->data);
 	NodePtr sibling = _get_sibling(u.get());
-	NodePtr red_child;
-
-	if (parent->right == sibling && sibling->right->color == NodeColor::RED)
+	// RR or LL case
+	if (_is_remove_fix_state101(sibling))
 	{
-		// sibling is parent right child and the red node is on sibling right
-		// hence RR case.
-		red_child = sibling->right;
-		_rotate_left(parent);
-	}
-	else if (parent->right == sibling)
-	{
-		// sibling is parent right child and the red node is on sibling left
-		// hence RL case.
-		red_child = sibling->left;
-		_rotate_right(sibling);
-		_rotate_left(parent);
-	}
-	else if (sibling->left->color == NodeColor::RED)
-	{
-		// sibling is parent left child and the red node is on sibling left
-		// hence LL case
-		red_child = sibling->left;
-		_rotate_right(parent);
-	}
-	else
-	{
-		// LR case
-		red_child = sibling->right;
-		_rotate_left(sibling);
-		_rotate_right(parent);
+		return _remove_fix_state101(u);
 	}
 
-	// color the sibling the original parent color.
-	sibling->color = parent->color;
-
-	// color the parent and the doubl-black node to black
-	parent->color = NodeColor::BLACK;
-	u->color = NodeColor::BLACK;
-	red_child->color = NodeColor::BLACK;
+	// LR or RL case
+	_remove_fix_state110(u);
 }
 
 template<typename T>
@@ -725,8 +710,77 @@ void RBTree<T>::_remove_fix_state100(NodePtr u)
 template<typename T>
 void RBTree<T>::_remove_fix_state101(NodePtr u)
 {
-	// u is red, u->parent is black, then rotate u->parent
-	// in the opposite direction of u. Then _remove_fix_state010(u)
+	NodePtr parent = find(u->parent->data);
+	NodePtr sibling = _get_sibling(u.get());
+	NodePtr red_child;
+	if (parent->right == sibling && sibling->right->color == NodeColor::RED)
+	{
+		// RR
+		red_child = sibling->right;
+		_rotate_left(parent);
+	}
+	else
+	{
+		// LL
+		red_child = sibling->left;
+		_rotate_right(parent);
+	}
+
+	// color the sibling the original parent color.
+	sibling->color = parent->color;
+
+	parent->color = NodeColor::BLACK;
+	red_child->color = NodeColor::BLACK;
+}
+
+template<typename T>
+void RBTree<T>::_remove_fix_state110(NodePtr u)
+{
+	NodePtr parent = find(u->parent->data);
+	NodePtr sibling = _get_sibling(u.get());
+
+	if (sibling->left->color == NodeColor::RED)
+	{
+		// RL
+		sibling->left->color = NodeColor::BLACK;
+		_rotate_right(sibling);
+	}
+	else
+	{
+		// LR
+		sibling->right->color = NodeColor::BLACK;
+		_rotate_left(sibling);
+	}
+
+	sibling->color = NodeColor::RED;
+	
+	// Recurse for fixing RR or LL
+	_remove_fix_state101(u);
+}
+
+template<typename T>
+void RBTree<T>::_remove_fix_state111(NodePtr u)
+{
+	NodePtr parent = find(u->parent->data);
+	NodePtr sibling = _get_sibling(u.get());
+
+	// recolor
+	sibling->color = NodeColor::BLACK;
+	parent->color = NodeColor::RED;
+
+	// rotate the parent in the other direction of red sibling
+	if (parent->left == sibling)
+	{
+		_rotate_right(parent);
+	}
+	else
+	{
+		_rotate_left(parent);
+	}
+
+	// we endup in one of the double black situation where the sibling
+	// is black, so, we call state010.
+	_remove_fix_state010(u);
 }
 
 template<typename T>
@@ -754,11 +808,19 @@ bool RBTree<T>::_is_root(RawNodePtr node)
 }
 
 template<typename T>
-bool RBTree<T>::_is_state10(RawNodePtr node)
+bool RBTree<T>::_is_insert_fix_state10(RawNodePtr node)
 {
 	ParentPtr grand_parent = node->parent->parent;
 	return grand_parent->left->left.get() == node
 		|| grand_parent->right->right.get() == node;
+}
+
+template<typename T>
+bool RBTree<T>::_is_remove_fix_state101(NodePtr node)
+{
+	ParentPtr parent = node->parent;
+	return parent->right == node && node->right->color == NodeColor::RED
+		|| parent->left == node && node->left->color == NodeColor::RED;
 }
 
 template<typename T>
