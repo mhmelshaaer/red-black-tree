@@ -107,7 +107,7 @@ private:
 	 * 		no longer part of the red-black tree at that moment.
 	 */
     void _remove_fix(NodePtr u, NodePtr v);
-	
+
     void _link_parent_child(ParentPtr parent, NodePtr child);
     void _print_tree(NodePtr root, std::string indent, bool last);
 	void _rotate_left(NodePtr);
@@ -120,13 +120,13 @@ private:
 	 * 
 	 * @param node NodePtr.
 	 */
-	void _fix_state00(NodePtr node);
+	void _insert_fix_state00(NodePtr node);
 	/**
 	 * @brief Node parent sibling is colored black.
 	 * 
 	 * @param node NodePtr.
 	 */
-	void _fix_state01(NodePtr node);
+	void _insert_fix_state01(NodePtr node);
 
 	/**
 	 * @brief Node parent sibling is colored black and
@@ -134,7 +134,7 @@ private:
 	 * 
 	 * @param node NodePtr.
 	 */
-	void _fix_state10(NodePtr node);
+	void _insert_fix_state10(NodePtr node);
 
 	/**
 	 * @brief Node parent sibling is colored black and
@@ -142,7 +142,7 @@ private:
 	 * 
 	 * @param node NodePtr.
 	 */
-	void _fix_state11(NodePtr node);
+	void _insert_fix_state11(NodePtr node);
 
 	/**
 	 * @brief If the deleted node or the 
@@ -438,12 +438,12 @@ void RBTree<T>::_insert_fix(NodePtr node) {
 	if (parent_sibling->color == NodeColor::RED)
 	{
 		// state 00: a parent sibling is red
-		_fix_state00(node);
+		_insert_fix_state00(node);
 	}
 	else
 	{
 		// state 01: a parent sibling is black
-		_fix_state01(node);
+		_insert_fix_state01(node);
 	}
 }
 
@@ -551,7 +551,7 @@ void RBTree<T>::_swap_node(NodePtr v, NodePtr u)
 }
 
 template<typename T>
-void RBTree<T>::_fix_state00(NodePtr node)
+void RBTree<T>::_insert_fix_state00(NodePtr node)
 {
 	NodePtr grand_parent = find(node->parent->parent->data);
 	NodePtr parent = grand_parent->left.get() == node->parent
@@ -567,20 +567,20 @@ void RBTree<T>::_fix_state00(NodePtr node)
 }
 
 template<typename T>
-void RBTree<T>::_fix_state01(NodePtr node)
+void RBTree<T>::_insert_fix_state01(NodePtr node)
 {
 	if (_is_state10(node.get()))
 	{
 		// single rotation
-		return _fix_state10(node);
+		return _insert_fix_state10(node);
 	}
 	
 	// double rotation
-	_fix_state11(node);
+	_insert_fix_state11(node);
 }
 
 template<typename T>
-void RBTree<T>::_fix_state10(NodePtr node)
+void RBTree<T>::_insert_fix_state10(NodePtr node)
 {
 	NodePtr grand_parent = find(node->parent->parent->data);
 
@@ -599,7 +599,7 @@ void RBTree<T>::_fix_state10(NodePtr node)
 }
 
 template<typename T>
-void RBTree<T>::_fix_state11(NodePtr node)
+void RBTree<T>::_insert_fix_state11(NodePtr node)
 {
 	NodePtr grand_parent = find(node->parent->parent->data);
 	NodePtr parent;
@@ -615,7 +615,7 @@ void RBTree<T>::_fix_state11(NodePtr node)
 		_rotate_right(grand_parent->right);
 	}
 
-	_fix_state10(parent);
+	_insert_fix_state10(parent);
 }
 
 template<typename T>
