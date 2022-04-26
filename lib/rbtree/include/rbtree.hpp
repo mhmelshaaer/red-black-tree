@@ -211,7 +211,7 @@ private:
 
 	bool _is_root(NodePtr);
 	bool _is_root(RawNodePtr);
-	bool _is_insert_fix_state10(RawNodePtr);
+	bool _is_insert_fix_state10(NodePtr);
 	bool _is_remove_fix_state000(NodePtr, NodePtr);
 	bool _is_remove_fix_state101(NodePtr);
     bool _has_two_child(NodePtr node);
@@ -600,7 +600,7 @@ void RBTree<T>::_insert_fix_state00(NodePtr node)
 template<typename T>
 void RBTree<T>::_insert_fix_state01(NodePtr node)
 {
-	if (_is_insert_fix_state10(node.get()))
+	if (_is_insert_fix_state10(node))
 	{
 		// single rotation
 		return _insert_fix_state10(node);
@@ -822,11 +822,11 @@ bool RBTree<T>::_is_root(RawNodePtr node)
 }
 
 template<typename T>
-bool RBTree<T>::_is_insert_fix_state10(RawNodePtr node)
+bool RBTree<T>::_is_insert_fix_state10(NodePtr node)
 {
 	ParentPtr grand_parent = node->parent->parent;
-	return grand_parent->left->left.get() == node
-		|| grand_parent->right->right.get() == node;
+	return grand_parent->left->left == node
+		|| grand_parent->right->right == node;
 }
 
 template<typename T>
