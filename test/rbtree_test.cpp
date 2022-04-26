@@ -92,3 +92,87 @@ void test_find_non_existing_node()
     tree.insert(25);
     assert(tree.is_terminal(tree.find(50)));
 }
+
+void test_remove_when_black_sibling_red_children_rl_rr()
+{
+    RBTree<int> tree;
+    std::vector<int> to_be_inserted { 8, 18, 5, 15, 17, 6 };
+    for(const auto& v: to_be_inserted)
+    {
+        tree.insert(v);
+    }
+
+	tree.remove(5);
+	tree.remove(18);
+	tree.remove(6);
+    
+    assert(
+        tree.get_root()->data == 15 && tree.is_black(tree.get_root()) 
+        && tree.get_root()->left->data == 8 && tree.is_black(tree.get_root()->left) 
+        && tree.get_root()->right->data == 17 && tree.is_black(tree.get_root()->right) 
+    );
+}
+
+void test_remove_when_black_sibling_red_children_lr_ll()
+{
+    RBTree<int> tree;
+    std::vector<int> to_be_inserted { 20, 15, 25, 10, 18, 30 };
+    for(const auto& v: to_be_inserted)
+    {
+        tree.insert(v);
+    }
+
+	tree.remove(25);
+	tree.remove(10);
+	tree.remove(30);
+
+    assert(
+        tree.get_root()->data == 18 && tree.is_black(tree.get_root()) 
+        && tree.get_root()->left->data == 15 && tree.is_black(tree.get_root()->left) 
+        && tree.get_root()->right->data == 20 && tree.is_black(tree.get_root()->right) 
+    );
+}
+
+void test_remove_when_black_sibling_black_children_black_parent()
+{
+    RBTree<int> tree;
+    std::vector<int> to_be_inserted { 15, 10, 20, 5, 13, 18, 25, 2, 8, 1, 3, 4 };
+    for(const auto& v: to_be_inserted)
+    {
+        tree.insert(v);
+    }
+
+	tree.remove(4);
+	tree.remove(2);
+	tree.remove(3);
+	tree.remove(8);
+
+    assert(
+        tree.get_root()->data == 10 && tree.is_black(tree.get_root()) 
+        && tree.get_root()->right->data == 15
+        && tree.is_red(tree.get_root()->right) 
+        && tree.get_root()->left->left->data == 1
+        && tree.is_red(tree.get_root()->left->left)
+    );
+}
+
+void test_remove_when_red_sibling()
+{
+    RBTree<int> tree;
+    std::vector<int> to_be_inserted { 15, 10, 20, 5, 13, 18, 25, 2, 8, 1, 3, 4 };
+    for(const auto& v: to_be_inserted)
+    {
+        tree.insert(v);
+    }
+
+	tree.remove(8);
+
+    assert(
+        tree.get_root()->data == 10 && tree.is_black(tree.get_root()) 
+        && tree.get_root()->left->data == 2
+        && tree.is_black(tree.get_root()->left)
+        && tree.get_root()->left->right->data == 4
+        && tree.is_red(tree.get_root()->left->right)
+    );
+}
+

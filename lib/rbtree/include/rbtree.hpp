@@ -49,6 +49,8 @@ public:
     void print_tree();
 
 	bool is_terminal(NodePtr);
+	bool is_black(NodePtr);
+	bool is_red(NodePtr);
 
 private:
 	/**
@@ -227,6 +229,18 @@ template<typename T>
 bool RBTree<T>::is_terminal(NodePtr node)
 {
 	return node == _TNULL;
+}
+
+template<typename T>
+bool RBTree<T>::is_black(NodePtr node)
+{
+	return node->color == NodeColor::BLACK;
+}
+
+template<typename T>
+bool RBTree<T>::is_red(NodePtr node)
+{
+	return node->color == NodeColor::RED;
 }
 
 template<typename T>
