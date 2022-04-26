@@ -51,9 +51,35 @@ public:
 	bool is_terminal(NodePtr);
 
 private:
-    NodePtr _find(NodePtr node, T key);
+	/**
+	 * @brief Perform a BST find operation.
+	 * 
+	 * @param node subtree root.
+	 * @param key key to search for.
+	 * @return NodePtr 
+	 */
+    NodePtr _find(NodePtr root, T key);
+
+	/**
+	 * @brief Perform a BST insertion operation.
+	 * 
+	 * @param root subtree root
+	 * @param parent parent of the current subtree root.
+	 * @param key Key to be inserted
+	 * @return NodePtr The inserted node.
+	 */
     NodePtr _insert(NodePtr root, ParentPtr parent, T key);
-    NodePtr _remove(NodePtr, NodePtr, T);
+
+	/**
+	 * @brief Perform a BST deletion operation.
+	 * 
+	 * @param root subtree root
+	 * @param parent parent of the current subtree root.
+	 * @param key Key to be deleted
+	 * @return NodePtr The BST Replacement.
+	 */
+    NodePtr _remove(NodePtr root, NodePtr parent, T key);
+
 	NodePtr _get_sibling(ParentPtr);
 	NodePtr _get_single_child(NodePtr);
 
@@ -62,8 +88,26 @@ private:
     NodePtr _predecessor(NodePtr node);
     NodePtr _rbmaximum(NodePtr node);
 
+	/**
+	 * @brief Fix red-black tree imbalance after insertion.
+	 * 
+	 * @param node The newly inserted node.
+	 */
     void _insert_fix(NodePtr node);
-    void _remove_fix(NodePtr, NodePtr);
+	/**
+	 * @brief Fix the tree **AFTER** BST deletion.
+	 * 
+	 * @param u The BST Replacement node. The actual deleted node.
+	 * 		Usually, it will be one of the following two possibilities.
+	 * 			1- u := v successor/predecessor.
+	 * 			2. u := _TNULL with parent pointer set to the v->parent.
+	 * 		Anywhere in the code, if you found a node named "u", then
+	 * 		this is the BST Replacment node.
+	 * @param v The node that was required to be deleted. This node is 
+	 * 		no longer part of the red-black tree at that moment.
+	 */
+    void _remove_fix(NodePtr u, NodePtr v);
+	
     void _link_parent_child(ParentPtr parent, NodePtr child);
     void _print_tree(NodePtr root, std::string indent, bool last);
 	void _rotate_left(NodePtr);
@@ -105,21 +149,21 @@ private:
 	 * 		replacement node is RED.
 	 * 
 	 */
-	void _remove_fix_state000(NodePtr, NodePtr);
+	void _remove_fix_state000(NodePtr);
 
 	/**
 	 * @brief If both the deleted and the replacement
 	 * 		nodes are black.
 	 * 
 	 */
-	void _remove_fix_state001(NodePtr, NodePtr);
+	void _remove_fix_state001(NodePtr);
 
 	/**
 	 * @brief If both the deleted and the replacement
 	 * 		nodes are black and sibling node is black.
 	 * 
 	 */
-	void _remove_fix_state010(NodePtr, NodePtr);
+	void _remove_fix_state010(NodePtr);
 
 	/**
 	 * @brief If both the deleted and the replacement
@@ -127,22 +171,23 @@ private:
 	 * 		with at least a red child.
 	 * 
 	 */
-	void _remove_fix_state011(NodePtr, NodePtr);
+	void _remove_fix_state011(NodePtr);
 
 	/**
 	 * @brief If both the deleted and the replacement
 	 * 		nodes are black and sibling node is black
-	 * 		with all black children.
+	 * 		with all black children. Black, Black
+	 * 		everywhere.
 	 * 
 	 */
-	void _remove_fix_state100(NodePtr, NodePtr);
+	void _remove_fix_state100(NodePtr);
 
 	/**
 	 * @brief If both the deleted and the replacement
 	 * 		nodes are black and sibling node is red.
 	 * 
 	 */
-	void _remove_fix_state101(NodePtr, NodePtr);
+	void _remove_fix_state101(NodePtr);
 
 	void _switch_color(RawNodePtr);
 
@@ -406,10 +451,10 @@ template<typename T>
 void RBTree<T>::_remove_fix(NodePtr u, NodePtr v)
 {
 	if (_is_remove_fix_state000(u, v)) {
-		return _remove_fix_state000(u, v);
+		return _remove_fix_state000(u);
 	}
 
-	_remove_fix_state001(u, v);
+	_remove_fix_state001(u);
 }
 
 template<typename T>
@@ -574,39 +619,39 @@ void RBTree<T>::_fix_state11(NodePtr node)
 }
 
 template<typename T>
-void RBTree<T>::_remove_fix_state000(NodePtr u, NodePtr v)
+void RBTree<T>::_remove_fix_state000(NodePtr u)
 {
 	u->color = NodeColor::BLACK;
 }
 
 template<typename T>
-void RBTree<T>::_remove_fix_state001(NodePtr u, NodePtr v)
+void RBTree<T>::_remove_fix_state001(NodePtr u)
 {
 	NodePtr sibling = _get_sibling(u.get());
 
 	if (sibling->color == NodeColor::BLACK)
 	{
-		return _remove_fix_state010(u, v);
+		return _remove_fix_state010(u);
 	}
 
-	_remove_fix_state101(u, v);
+	_remove_fix_state101(u);
 }
 
 template<typename T>
-void RBTree<T>::_remove_fix_state010(NodePtr u, NodePtr v)
+void RBTree<T>::_remove_fix_state010(NodePtr u)
 {
 	NodePtr sibling = _get_sibling(u.get());
 
 	if (_has_red_child(sibling))
 	{
-		return _remove_fix_state011(u, v);
+		return _remove_fix_state011(u);
 	}
 
-	_remove_fix_state100(u, v);
+	_remove_fix_state100(u);
 }
 
 template<typename T>
-void RBTree<T>::_remove_fix_state011(NodePtr u, NodePtr v)
+void RBTree<T>::_remove_fix_state011(NodePtr u)
 {
 	NodePtr parent = find(u->parent->data);
 	NodePtr sibling = _get_sibling(u.get());
@@ -652,16 +697,36 @@ void RBTree<T>::_remove_fix_state011(NodePtr u, NodePtr v)
 }
 
 template<typename T>
-void RBTree<T>::_remove_fix_state100(NodePtr u, NodePtr v)
+void RBTree<T>::_remove_fix_state100(NodePtr u)
 {
-	// recolor then _remove_fix_state100(v->parent)
+	// base case in case the recoloring required recursive fix.
+	if (_is_root(u.get()))
+	{
+		return;
+	}
+
+	NodePtr parent = find(u->parent->data);
+	NodePtr sibling = _get_sibling(u.get());
+
+	// color u black and sibling red
+	u->color = NodeColor::BLACK;
+	sibling->color = NodeColor::RED;
+
+	if (_is_root(parent.get()) || parent->color == NodeColor::RED)
+	{
+		parent->color = NodeColor::BLACK;
+		return;
+	}
+
+	// parent becomes double black, fix it.
+	_remove_fix_state100(parent);
 }
 
 template<typename T>
-void RBTree<T>::_remove_fix_state101(NodePtr u, NodePtr v)
+void RBTree<T>::_remove_fix_state101(NodePtr u)
 {
 	// u is red, u->parent is black, then rotate u->parent
-	// in the opposite direction of u. Then _remove_fix_state010(u, v)
+	// in the opposite direction of u. Then _remove_fix_state010(u)
 }
 
 template<typename T>
