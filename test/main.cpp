@@ -19,7 +19,8 @@ int main() {
     test_find_non_existing_node();
 
     printf("Starting tree remove tests...\n");
-
+    
+    test_remove_when_internal_node();
     test_remove_when_black_sibling_red_children_rl_rr();
     test_remove_when_black_sibling_red_children_lr_ll();
     test_remove_when_black_sibling_black_children_black_parent();

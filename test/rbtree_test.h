@@ -19,6 +19,7 @@ void test_find_root();
 void test_find_existing_node();
 void test_find_non_existing_node();
 
+void test_remove_when_internal_node();
 void test_remove_when_black_sibling_red_children_rl_rr();
 void test_remove_when_black_sibling_red_children_lr_ll();
 void test_remove_when_black_sibling_black_children_black_parent();

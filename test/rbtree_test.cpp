@@ -93,6 +93,20 @@ void test_find_non_existing_node()
     assert(tree.is_terminal(tree.find(50)));
 }
 
+void test_remove_when_internal_node()
+{
+    RBTree<int> tree;
+    std::vector<int> to_be_inserted { 3, 5, 7 };
+    for(const auto& v: to_be_inserted)
+    {
+        tree.insert(v);
+    }
+
+	tree.remove(5);
+
+    assert(tree.get_root()->data == 7);
+}
+
 void test_remove_when_black_sibling_red_children_rl_rr()
 {
     RBTree<int> tree;

@@ -24,7 +24,9 @@ struct RBTreeNode
 
 template<typename T>
 class RBTree {
-private:
+
+// They should be prvate but swig cannot wrap the lib when typedefs are private
+public:
     typedef RBTreeNode<T> Node;
     typedef typename Node::node_color NodeColor;
     typedef std::shared_ptr<RBTreeNode<T>> NodePtr;
@@ -268,6 +270,11 @@ void RBTree<T>::remove(T key)
 	// check if exists
 	NodePtr v = find(key);
 	if (v == _TNULL) return;
+
+	if (_has_two_child(v))
+	{
+		v = _successor(v);
+	}
 
 	NodePtr u = _remove(_root, nullptr, key);
 	_remove_fix(u, v);
