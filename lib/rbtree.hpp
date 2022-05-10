@@ -8,10 +8,6 @@
 #ifndef RB_TREE
 #define RB_TREE
 
-#include <iostream>
-#include <memory>
-
-
 template<typename T>
 struct RBTreeNode
 {
