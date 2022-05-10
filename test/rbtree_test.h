@@ -1,7 +1,6 @@
 #ifndef RB_TREE_TEST_H
 #define RB_TREE_TEST_H
 
-#include <iostream>
 #include <assert.h>
 #include <vector>
 

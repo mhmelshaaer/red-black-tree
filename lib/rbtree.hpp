@@ -1,3 +1,10 @@
+#ifndef SWIG
+
+#include <iostream>
+#include <memory>
+
+#endif
+
 #ifndef RB_TREE
 #define RB_TREE
 
