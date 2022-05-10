@@ -1,5 +1,6 @@
-add_library(rbtreelib INTERFACE)
+set(target rbtree)
+add_library(${target} INTERFACE)
 target_include_directories(
-    rbtreelib INTERFACE
+    ${target} INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}
 )

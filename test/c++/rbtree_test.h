@@ -1,10 +1,16 @@
 #ifndef RB_TREE_TEST_H
 #define RB_TREE_TEST_H
 
+#ifndef SWIG
+
 #include <assert.h>
 #include <vector>
 
 #include "rbtree.hpp"
+
+#endif
+
+void run();
 
 void test_create_int_rbtree();
 void test_create_char_rbtree();
