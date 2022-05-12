@@ -1,0 +1,44 @@
+
+image: gcc
+
+build_linux:
+  stage: build
+  image: arwash.rdi:5000/lumos_openjdk:latest
+  script:
+    # fetch python prebuild binary and headers
+    - mkdir -p /usr/include/python
+    - scp -r ninja@turtle.rdi:/home/ninja/cpp_team/prebuilt/linux/python/include/* /usr/include/python
+    - scp -r ninja@turtle.rdi:/home/ninja/cpp_team/prebuilt/linux/python /usr/bin/python
+
+    # install swig
+    - cd /home
+    - apt-get -y install libpcre3-dev
+    - wget -P /home --no-check-certificate https://sourceforge.net/projects/swig/files/swig/swig-4.0.1/swig-4.0.1.tar.gz
+    - tar -xzvf swig-4.0.1.tar.gz && cd swig-4.0.1
+    - ./configure && make && make install
+    - cd /builds/Misc/rb-tree && ls -la
+
+    # Configure and build
+    - cmake . -Bbuilds/linux -DPYTHON_LIBRARY=/usr/bin/python -DPYTHON_INCLUDE_DIR=/usr/include/python
+    - cmake --build builds/linux --parallel $(nproc)
+  artifacts:
+    paths:
+      - builds/linux
+
+# run tests using the binary built before
+cpp_test_linux:
+  image: arwash.rdi:5000/lumos:latest
+  stage: test
+  tags:
+    - docker
+  script:
+    - ./builds/linux/test/c++/main
+
+# run tests using the binary built before
+python_test_linux:
+  image: arwash.rdi:5000/lumos:latest
+  stage: test
+  tags:
+    - docker
+  script:
+    - python3 builds/linux/test/python/main.py
