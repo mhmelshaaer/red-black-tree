@@ -1,7 +1,7 @@
 FIND_PACKAGE(SWIG REQUIRED)
 INCLUDE(${SWIG_USE_FILE})
 
-if(python)
+if(PYTHON_SDK)
     FIND_PACKAGE(PythonLibs)
 endif()
 

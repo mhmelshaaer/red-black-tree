@@ -1,10 +1,10 @@
 add_subdirectory(c++)
 
-if(python)
+if(PYTHON_SDK)
 
 add_subdirectory(python)
 
-elseif(csharp)
+elseif(CSHARP_SDK)
 
 add_subdirectory(csharp)
 

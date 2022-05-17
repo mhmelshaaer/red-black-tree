@@ -8,16 +8,15 @@ endif()
 # Build the rbtree lib
 add_subdirectory(lib)
 
-option(python "Build python" OFF)
-option(csharp "Build csharp" OFF)
-option(build_cpp_test "Build cpp" OFF)
+option(PYTHON_SDK "Build python SDK" OFF)
+option(CSHARP_SDK "Build csharp SDK" OFF)
 
-if(python)
+if(PYTHON_SDK)
 
   set(module_lang "python")
   add_subdirectory(wrappers ${CMAKE_BINARY_DIR}/wrappers/python)
 
-elseif(csharp)
+elseif(CSHARP_SDK)
 
   set(module_lang "csharp")
   add_subdirectory(wrappers ${CMAKE_BINARY_DIR}/wrappers/csharp)
