@@ -1,5 +1,8 @@
+stages:
+  - build
+  - test
+  - deploy
 
-image: gcc
 
 build_linux:
   stage: build
@@ -38,3 +41,27 @@ python_test_linux:
     - docker
   script:
     - python3 builds/linux/test/python/main.py
+
+deploy:
+  stage: deploy
+  tags:
+    - encryption
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+  dependencies:
+    - build_linux
+  variables:                              
+    DEPLOY_PATH: ninja@turtle.rdi:/home/ninja/cpp_team/training_plan/ContinuousDelivery/
+
+  script:
+    # Copy rbtree Python SDK
+    - mkdir -p rbtree/linux/python
+    - cp -t rbtree/linux/python builds/linux/wrappers/python/*.py builds/linux/wrappers/python/*.so builds/linux/wrappers/csharp/*.cxx
+
+    # Copy rbtree C# SDK
+    - mkdir -p rbtree/linux/csharp
+    - cp -t rbtree/linux/csharp builds/linux/wrappers/csharp/*.cs builds/linux/wrappers/csharp/*.so builds/linux/wrappers/csharp/*.cxx
+
+    # Pack and upload
+    - zip -r rbtree.zip rbtree/*
+    - scp rbtree.zip $DEPLOY_PATH
