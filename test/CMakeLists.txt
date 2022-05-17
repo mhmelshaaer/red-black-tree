@@ -4,7 +4,9 @@ if(PYTHON_SDK)
 
 add_subdirectory(python)
 
-elseif(CSHARP_SDK)
+endif()
+
+if(CSHARP_SDK)
 
 add_subdirectory(csharp)
 

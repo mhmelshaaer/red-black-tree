@@ -16,7 +16,9 @@ if(PYTHON_SDK)
   set(module_lang "python")
   add_subdirectory(wrappers ${CMAKE_BINARY_DIR}/wrappers/python)
 
-elseif(CSHARP_SDK)
+endif()
+
+if(CSHARP_SDK)
 
   set(module_lang "csharp")
   add_subdirectory(wrappers ${CMAKE_BINARY_DIR}/wrappers/csharp)
