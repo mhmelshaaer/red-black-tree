@@ -19,7 +19,11 @@ build_linux:
     - cd /builds/Misc/rb-tree && ls -la
 
     # Configure and build
-    - cmake . -Bbuilds/linux -DPYTHON_LIBRARY=/usr/bin/python -DPYTHON_INCLUDE_DIR=/usr/include/python
+    - cmake . -Bbuilds/linux \
+      -DPYTHON_LIBRARY=/usr/bin/python \
+      -DPYTHON_INCLUDE_DIR=/usr/include/python \
+      -DPYTHON_SDK=ON \
+      -DCSHARP_SDK=ON
     - cmake --build builds/linux --parallel $(nproc)
   artifacts:
     paths:
