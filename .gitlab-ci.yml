@@ -56,11 +56,11 @@ deploy:
   script:
     # Copy rbtree Python SDK
     - mkdir -p rbtree/linux/python
-    - cp -t rbtree/linux/python builds/linux/wrappers/python/*.py builds/linux/wrappers/python/*.so builds/linux/wrappers/csharp/*.cxx
+    - cp -t rbtree/linux/python builds/linux/wrappers/python/*.py builds/linux/wrappers/python/*.so
 
     # Copy rbtree C# SDK
     - mkdir -p rbtree/linux/csharp
-    - cp -t rbtree/linux/csharp builds/linux/wrappers/csharp/*.cs builds/linux/wrappers/csharp/*.so builds/linux/wrappers/csharp/*.cxx
+    - cp -t rbtree/linux/csharp builds/linux/wrappers/csharp/*.cs builds/linux/wrappers/csharp/*.so
 
     # Pack and upload
     - zip -r rbtree.zip rbtree/*
